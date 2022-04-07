@@ -16,8 +16,9 @@ Import-Module -Name PSReadline
 $icon = $args[0]
 $brand = $args[1]
 
-#Retrieves every folder under \RESOURCES\CURSORS as arrays
-$CURSOR_FOLDERS = gci ".\RESOURCES\CURSORS\" | ? {$_.Name -notlike "_*" -and $_.Name -ne "Current" -and $_.PSIsContainer} | Sort-Object
+#Retrieves every folder and file under \RESOURCES\CURSORS as arrays
+$CURSORS = Get-ChildItem ".\RESOURCES\CURSORS\" | ? {$_.Name -notlike "_*" -and $_.Name -ne "Current" -and $_.PSIsContainer} | Sort-Object
+$CURSORS += Get-ChildItem ".\RESOURCES\CURSORS\" | ? {$_.Name -notlike "_*" -and $_.Name -ne "Current" -and ($_.Name -Like "*.png" -or $_.Name -Like "*.jpg")} | Sort-Object
 #The path to the Roblox cursor folder
 $robloxCursorFolder = ""
 #The new selected cursor
@@ -174,7 +175,11 @@ function RetrieveCurrentRobloxCursor{
 #Package ComboBox - When cursor is selected displays the cusror in $pictureboxnewCursor
 $comboboxCursor.add_SelectedIndexChanged({
 	if ($this.SelectedItem -ne "Please Select..."){
-		$global:newCursorLocation = ".\RESOURCES\CURSORS\"+$this.SelectedItem+"\cursor.png"
+		If (Test-Path -Path ".\RESOURCES\CURSORS\$($this.SelectedItem)" -PathType Container){
+			$global:newCursorLocation = ".\RESOURCES\CURSORS\"+$this.SelectedItem+"\cursor.png"
+		} Else {
+			$global:newCursorLocation = ".\RESOURCES\CURSORS\"+$this.SelectedItem
+		}
 		$pictureboxNewCursor.image = [System.Drawing.Image]::FromFile($global:newCursorLocation)
 	}else {
 		$pictureboxNewCursor.image = $null
@@ -208,8 +213,8 @@ $buttonChangeCursor.Add_Click({
 ##################################################################################################################################
 #This section runs after the program has fully initialized
 
-#Appends each folder in $CURSOR_FOLDERS to $comboboxCursor as list items
-$CURSOR_FOLDERS | %{[void] $comboboxCursor.Items.Add($_.Name)}
+#Appends each element in $CURSORS to $comboboxCursor as list items
+$CURSORS | %{[void] $comboboxCursor.Items.Add($_.Name)}
 
 #Calls RetrieveCurrentRobloxCursor to get the current roblox cursor
 RetrieveCurrentRobloxCursor

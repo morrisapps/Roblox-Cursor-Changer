@@ -32,7 +32,7 @@ $changeIcon = [System.Drawing.Image]::FromFile(".\RESOURCES\ICONS\change.png")
 #MainMenu Form
 $formMainMenu                        = New-Object system.Windows.Forms.Form
 $formMainMenu.ClientSize             = New-Object System.Drawing.Point(386,341)
-$formMainMenu.text                   = "Curser Changer for Roblox"
+$formMainMenu.text                   = "Cursor Changer for Roblox"
 $formMainMenu.TopMost                = $false
 $formMainMenu.BackColor              = [System.Drawing.ColorTranslator]::FromHtml("#ffffff")
 $formMainMenu.FormBorderStyle        = 'FixedDialog'

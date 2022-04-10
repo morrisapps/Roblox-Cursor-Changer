@@ -1,3 +1,30 @@
+<#
+.SYNOPSIS
+	Winform that contains buttons for Roblox tools. 
+	Acts as a main menu.
+.PARAMETER $VERSION
+    [string] The version of the program.
+.INPUTS
+    Icons under .\RESOURCES\ICONS\
+.NOTES
+    Created by Morrisapps (Corey Morris).
+#>
+
+##################################################################################################################################
+#---------------------------------------------------------[Global Variables]------------------------------------------------------
+##################################################################################################################################
+
+###Arguments from Start###
+param (
+    [string]$VERSION
+)
+
+######Images######
+$BRAND = [System.Drawing.Image]::FromFile(".\RESOURCES\ICONS\brand.png")
+$ICON = New-Object system.drawing.icon(".\RESOURCES\ICONS\Logo.ico")
+$DEFAULTICON = [System.Drawing.Image]::FromFile(".\RESOURCES\ICONS\default.png")
+$CHANGEICON = [System.Drawing.Image]::FromFile(".\RESOURCES\ICONS\change.png")
+
 ##################################################################################################################################
 #---------------------------------------------------------[Initialization]--------------------------------------------------------
 ##################################################################################################################################
@@ -7,19 +34,6 @@ Add-Type -Assembly System.Drawing
 Add-Type -AssemblyName PresentationCore,PresentationFramework
 Add-Type -AssemblyName System.DirectoryServices.AccountManagement
 Import-Module -Name PSReadline
-
-##################################################################################################################################
-#---------------------------------------------------------[Global Variables]------------------------------------------------------
-##################################################################################################################################
-
-###Arguments from Start###
-$VERSION = $args[0]
-
-######Images######
-$brand = [System.Drawing.Image]::FromFile(".\RESOURCES\ICONS\brand.png")
-$icon = New-Object system.drawing.icon(".\RESOURCES\ICONS\Logo.ico")
-$defaultIcon = [System.Drawing.Image]::FromFile(".\RESOURCES\ICONS\default.png")
-$changeIcon = [System.Drawing.Image]::FromFile(".\RESOURCES\ICONS\change.png")
 
 ##################################################################################################################################
 #---------------------------------------------------------[GUI]-------------------------------------------------------------------
@@ -36,18 +50,18 @@ $formMainMenu.text                   = "Cursor Changer for Roblox"
 $formMainMenu.TopMost                = $false
 $formMainMenu.BackColor              = [System.Drawing.ColorTranslator]::FromHtml("#ffffff")
 $formMainMenu.FormBorderStyle        = 'FixedDialog'
-$formMainMenu.Icon                   = $icon
+$formMainMenu.Icon                   = $ICON
 $formMainMenu.MaximizeBox            = $false
 $formMainMenu.MinimizeBox            = $false
 $formMainMenu.FormBorderStyle 	     = 'FixedSingle'
 
 #Brand Image
-$pictureBrand                     = New-Object system.Windows.Forms.PictureBox
-$pictureBrand.width               = 300
-$pictureBrand.height              = 30
-$pictureBrand.location            = New-Object System.Drawing.Point(15,5)
-$pictureBrand.image               = $brand
-$pictureBrand.SizeMode            = 4
+$pictureboxBrand                     = New-Object system.Windows.Forms.PictureBox
+$pictureboxBrand.width               = 350
+$pictureboxBrand.height              = 58
+$pictureboxBrand.location            = New-Object System.Drawing.Point(0,0)
+$pictureboxBrand.image               = $BRAND
+$pictureboxBrand.SizeMode 			 = 1
 
 ######Labels######
 #Version Label
@@ -83,7 +97,7 @@ $buttonDefaultCursor.location              = New-Object System.Drawing.Point(70,
 $buttonDefaultCursor.Font                  = New-Object System.Drawing.Font('Segoe UI',8.25,[System.Drawing.FontStyle]([System.Drawing.FontStyle]::Bold))
 $buttonDefaultCursor.BackColor 				= '255, 192, 192'
 $buttonDefaultCursor.ForeColor 				= '0, 0, 192'
-$buttonDefaultCursor.Image                 = $defaultIcon
+$buttonDefaultCursor.Image                 = $DEFAULTICON
 $buttonDefaultCursor.TextImageRelation     = "ImageBeforeText"
 $buttonDefaultCursor.ImageAlign            = "MiddleRight"    
 $buttonDefaultCursor.TextAlign             = "MiddleLeft"
@@ -96,7 +110,7 @@ $buttonNewCursor.location           = New-Object System.Drawing.Point(70,110)
 $buttonNewCursor.Font               = New-Object System.Drawing.Font('Segoe UI',8.25,[System.Drawing.FontStyle]([System.Drawing.FontStyle]::Bold))
 $buttonNewCursor.BackColor 			= '192, 255, 192'
 $buttonNewCursor.ForeColor 			= '0, 0, 192'
-$buttonNewCursor.Image              = $changeIcon
+$buttonNewCursor.Image              = $CHANGEICON
 $buttonNewCursor.TextImageRelation  = "ImageBeforeText"
 $buttonNewCursor.ImageAlign         = "MiddleRight"    
 $buttonNewCursor.TextAlign          = "MiddleLeft"
@@ -113,19 +127,31 @@ $buttonQuit.DialogResult            = [System.Windows.Forms.DialogResult]::Cance
 
 
 #Adds all controls to the form
-$formMainMenu.controls.AddRange(@($pictureBrand,$labelVersion,$labelStatus,$buttonDefaultCursor,$buttonNewCursor,$buttonQuit))
+$formMainMenu.controls.AddRange(@($pictureboxBrand,$labelVersion,$labelStatus,$buttonDefaultCursor,$buttonNewCursor,$buttonQuit))
 
 ##################################################################################################################################
 #-----------------------------------------------------------[Functions]-----------------------------------------------------------
 ##################################################################################################################################
 
-#######DefaultCursor#######
+#######Set-DefaultCursor#######
 #Sets the Roblox cursor to the default cursor
-function DefaultCursor {	
+Function Set-DefaultCursor {
+	<#
+    .SYNOPSIS
+		Sets the Roblox cursor to the default cursor
+    .INPUTS
+		Cursor icons from .\RESOURCES\CURSORS\Default\
+    .OUTPUTS
+        Overwrites the Roblox cursor icons
+    .Notes
+        Roblox may have more than one version installed.
+		Sets cursors to the most recent version folder.
+    #>	
 	$errorCode = 0
 	try {
 		#Get most recent roblox version
-		$RobloxVersionFolder = gci "$($env:LOCALAPPDATA)\Roblox\Versions" | ? {$_.Name -like "version-*" -and $_.PSIsContainer} | Sort-Object LastWriteTime | Select-Object -last 1
+		$RobloxVersionFolder = Get-ChildItem "$($env:LOCALAPPDATA)\Roblox\Versions" `
+		| Where-Object {$_.Name -like "version-*" -and $_.PSIsContainer} | Sort-Object LastWriteTime | Select-Object -last 1
 		$robloxCursorFolder = "C:"+($RobloxVersionFolder.PSPATH).Split("::")[3]+"\content\textures\Cursors\KeyboardMouse"
 		#Default cursors
 		$defaultCursor1 = ".\RESOURCES\CURSORS\Default\ArrowCursor.png"
@@ -159,10 +185,10 @@ function DefaultCursor {
 ##################################################################################################################################
 
 #Fetch Tool clicked handler that launches the GUI Fetch.ps1
-$buttonDefaultCursor.Add_Click({ DefaultCursor })
+$buttonDefaultCursor.Add_Click({ Set-DefaultCursor })
 
 #New Cursor Tool clicked handler that launches the ChangeCursor.ps1
-$buttonNewCursor.Add_Click({ ./SRC/TOOLS/ChangeCursor.ps1 $icon $brand})
+$buttonNewCursor.Add_Click({ ./SRC/TOOLS/ChangeCursor.ps1 $ICON $BRAND})
 
 
 ##################################################################################################################################
@@ -170,5 +196,5 @@ $buttonNewCursor.Add_Click({ ./SRC/TOOLS/ChangeCursor.ps1 $icon $brand})
 ##################################################################################################################################
 #This section runs after the program has fully initialized
 
-#ShowDialog is assigned to result so that it suppresses messages after this form is closed.
-$result = $formMainMenu.ShowDialog()
+#ShowDialog is assigned to $null to suppress messages after this form is closed.
+$null = $formMainMenu.ShowDialog()

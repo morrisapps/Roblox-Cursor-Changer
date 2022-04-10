@@ -1,16 +1,22 @@
-#This file is immediately called after launching the .exe
-#Sets global variables for the entire application
+<#
+.SYNOPSIS
+    Starts the program passing global variables as arguments.
+.DESCRIPTION
+    This file is immediately called after launching the .exe
+    Sets global variables for the entire application
+.NOTES
+    Created by Morrisapps (Corey Morris)
+#>
 
 ##################################################################################################################################
 #---------------------------------------------------------[Global Variables]------------------------------------------------------
 ##################################################################################################################################
 
-$VERSION = "1.1"
+$VERSION = "2.0"
 
 ##################################################################################################################################
 #---------------------------------------------------------[Script]----------------------------------------------------------------
 ##################################################################################################################################
-#This section runs after the program has fully initialized
 
 #Starts main menu
 ./src/MainMenu.ps1 $VERSION
